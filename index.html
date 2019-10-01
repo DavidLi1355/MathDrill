@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+    <script>        
+        var level = 1;
+        var diffSign = 1;
+        var diffOfTimeCalculation = 1; //the variation of the amount of numbers in a question (like 4, 5)
+        var minDiffOfTimeCalculation = 4; //the minimum amout of numbers in a question
+        var diffOfNumCalculation = 2; //the range for the numbers after the first number
+        var firstNumRange = 20; //the range for the first number
+        var numbersOfQuesNeedToAsk = 20; //the number of questions need to be answered for a level
+        
+        var question = [];
+        var theAnswer = 0;
+        var answeredQuestions = 0;
+        var numCorret = 0;
+        var index = 0;
+        var totalQuestionDone = 0;
+        
+        function nextLevel() {
+
+        }
+
+        function start() {
+            index = 0;
+            numCorret = 0;
+            totalQuestionDone = 0;
+            answeredQuestions = 0;
+
+            questionDisplay();
+            getQuestion();
+            displayNum();
+
+            timer();
+        }
+
+        function end() {
+            question = [];
+            theAnswer = 0;
+            answeredQuestions = 0;
+            numCorret = 0;
+            index = 0;
+            totalQuestionDone = 0;
+            clearInterval(theTimer);
+        }
+
+        function clear() {
+            document.getElementById("start").style.display = "none";
+            document.getElementById("question").style.display = "none";
+            document.getElementById("answer").style.display = "none";
+            document.getElementById("questionResult").style.display = "none";
+            document.getElementById("finalResult").style.display = "none";
+            document.getElementById("footer").style.display = "none";
+        }
+
+        function home() {
+            clear();
+            end();
+            document.getElementById("start").style.display = "block";
+        }
+        
+        function questionDisplay() {
+            clear();
+            document.getElementById("question").style.display = "block";
+            document.getElementById("footer").style.display = "block";
+        }
+
+        function askAnswerDisplay() {
+            clear();
+            document.getElementById("answer").style.display = "block";
+        }
+
+        function questionResultDisplay() {
+            clear();
+            document.getElementById("questionResult").style.display = "block";
+        }
+
+        function resetQuestion() { //reset the variable for questions and also check wether complete number of targeted questions
+            index = 0;
+            totalQuestionDone++;
+
+            if (totalQuestionDone == numbersOfQuesNeedToAsk) { //completed 20 questions, calls displayFinalResult()
+                displayFinalResult();
+            }
+            else {
+                questionDisplay();
+                getQuestion();
+                displayNum();
+            }
+        }//WILL CALL: displayFinalResult()
+        
+        function displayFinalResult() { //Display the result for the end of the game
+            var timePerQuestion = returnTimePerQues();
+            var resultPassVar;
+            var buttonVar;
+            if (timePerQuestion < 10 && numCorret == numbersOfQuesNeedToAsk) {
+                resultPassVar = "You Passed! Congratulation";
+                buttonVar = "Next Level";
+                nextLevel();
+            } 
+            else {
+                resultPassVar = "Failed! Good Luck Next Time";
+                buttonVar = "Try Again";
+            }
+
+            document.getElementById("resultPass").innerHTML = resultPassVar;
+            document.getElementById("resultTime").innerHTML = timePerQuestion + " seconds per question";
+            document.getElementById("resultAcc").innerHTML = "You got " + numCorret + "/" + numbersOfQuesNeedToAsk + " correct";
+            document.getElementById("nextGame").innerHTML = buttonVar;
+
+            clear();
+            document.getElementById("finalResult").style.display = "block";
+
+            end();
+        }
+        
+        function getQuestion() {
+            question = [];
+            theAnswer = 0;
+
+            var firstNum = Math.floor((Math.random() * firstNumRange) + 1);
+            question.push("" + firstNum);
+            theAnswer += firstNum;
+        
+            var numOfCalculation = Math.floor((Math.random() * diffOfTimeCalculation) + minDiffOfTimeCalculation);
+        
+            for (var i = 0; i < numOfCalculation; i++) {
+                var sign = Math.floor((Math.random() * diffSign) + 1);
+                if (sign == 1) {
+                    var value = Math.floor((Math.random() * diffOfNumCalculation) + 1);
+                    theAnswer += value;
+                    question.push("+" + value);
+                } else if (sign == 2) {
+                    var value = Math.floor((Math.random() * diffOfNumCalculation) + 1);
+                    theAnswer -= value;
+                    question.push("-" + value);
+                }
+            }
+            question.push("=");
+        }
+
+        addEventListener("keypress", pressAny);
+        
+        function pressAny(event) {
+            var key = event.keyCode;
+            if (key == 13) {
+                nextnumOrAnswer();
+            }
+        }
+        
+        function nextnumOrAnswer() { //Display the next number or check for the answer
+            index++;
+            if (index != 0 && question[index-2] == "=") {
+                resetQuestion();
+            }
+            else if (index != 0 && question[index-1] == "=") {
+                checkAnswer();
+            } 
+            else if (question[index] == "=") {
+                askAnswerDisplay();
+            }
+            else {
+                displayNum();
+            }
+        } //WILL CALL: resetQuestion(), checkAnswer(), askAnswerDisplay(), displayNum()
+        
+        function displayNum() { 
+            if (index == 0) {
+                document.getElementById("printQuestion").innerHTML = "" + question[index];
+            } else {
+                document.getElementById("printQuestion").innerHTML = "" + question[index];
+            }
+        }
+        
+        function checkAnswer() { //Check the answer and display the result of each question
+            var userAnswer = document.getElementById("answerInput").value;
+            if (userAnswer == theAnswer) {
+                document.getElementById("image").src = "greenCheckMark.png";
+                numCorret++;
+            } else {
+                document.getElementById("image").src = "redCircle.png";
+            }
+            questionResultDisplay();
+            document.getElementById("answerInput").value = "";
+        } //WILL CALL: questionResultDisplay()
+        
+        var theTimer;
+        var countTime = 0;
+        
+        function timer() {
+            theTimer = setInterval(function() {
+                ++countTime;
+            }, 1000)
+        }
+        
+        function returnTimePerQues() {
+            clearInterval(theTimer);
+            return countTime / numbersOfQuesNeedToAsk;
+        }
+        
+    </script>
+
+
+
+
+    <style>
+        @keyframes bgcolor {
+        0% {
+        background-color: #45a3e5
+        }
+        30% {
+        background-color: #66bf39
+        }
+        60% {
+        background-color: #eb670f
+        }
+        90% {
+        background-color: #f35
+        }
+        100% {
+        background-color: #864cbf
+        }
+        }
+        body {
+        -webkit-animation: bgcolor 20s infinite;
+        animation: bgcolor 10s infinite;
+        -webkit-animation-direction: alternate;
+        animation-direction: alternate;
+        }
+        .footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        margin: auto;
+        text-align: center;
+        padding: 14px;
+        background-color: #c9c9c9;
+        font-size: 25px;
+        font-family: "Comic Sans MS";
+        }
+        .button {
+        border: none;
+        color: black;
+        background-color: Transparent;
+        outline:none;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 90px;
+        cursor: pointer;
+        font-family: "Comic Sans MS";
+        }
+        .centerDiv {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translateX(-50%) translateY(-50%);
+        font-family: "Comic Sans MS";
+        }
+        .question {
+        font-size: 70px;
+        }
+        .answer {
+        font-size: 60px;
+        }
+        .image {
+        width: 300px;
+        height: auto;
+        }
+        .textBox {
+        border: 3px solid gray;
+        height: 70px;
+        padding: 10px 15px;
+        width: 120px;
+        font-size: 50px;
+        font-family: "Comic Sans MS";
+        }
+        .result {
+        text-align: center;
+        font-size: 40px;
+        }
+        
+    </style>
+
+
+
+    <body>
+        <div class="centerDiv">
+            <button id="start" type="button" onclick="start()" class="button" style="display:block">Start</button>
+
+            <div id="question" class="question" style="display:none">
+                <p id="printQuestion"></p>
+            </div>
+
+            <div id="answer" class="answer" style="display:none">
+                <label for="answerInput">Answer: </label>
+                <input id="answerInput" type="text" class="textBox">
+            </div>
+
+            <div id="questionResult" style="display:none">
+                <img id="image" class="image" src="">
+            </div>
+
+            <div id="finalResult" class="result" style="display:none;margin:10px;">
+                <p id="resultPass" style="font-size: 60px;"></p>
+                <p id="resultTime"></p>
+                <p id="resultAcc"></p>
+                <button id="nextGame" type="button" onclick="start()" class="button" style="font-size:40px;color:white;border-radius:5px;"></button>
+            </div>
+        </div>
+
+        <p id="footer" class="footer" style="display:none">PRESS ENTER KEY TO CONTINUE</p>
+    </body>
+
+
+</html>
